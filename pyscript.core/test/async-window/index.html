@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="../../dist/core.css">
+    <script type="module" src="../../dist/core.js"></script>
+  </head>
+  <body>
+    <script>
+      addEventListener('py:all-done', async () => {
+        if (await mpy() !== true)
+          throw new Error('Unable to invoke async methods in MicroPython');
+        if (await py() !== true)
+          throw new Error('Unable to invoke async methods in Pyodide');
+        document.documentElement.classList.add('ok');
+      });
+    </script>
+    <script type="mpy" worker>
+      from pyscript import window
+
+      async def test():
+          print("test")
+          return True
+
+      window.mpy = test
+    </script>
+    <script type="py" worker>
+      from pyscript import window
+
+      async def test():
+          print("test")
+          return True
+
+      window.py = test
+    </script>
+  </body>
+</html>
