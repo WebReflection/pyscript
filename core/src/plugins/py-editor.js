@@ -11,6 +11,7 @@ const getID = (type) => `${type}-editor-${id++}`;
 
 const envs = new Map();
 const configs = new Map();
+const editors = new WeakMap();
 
 const hooks = {
     worker: {
@@ -30,12 +31,17 @@ const validate = (config, result) => {
     return result;
 };
 
+const getRelatedScript = (target, type) => {
+    const editor = target.closest(`.${type}-editor-box`);
+    return editor?.parentNode?.previousElementSibling;
+};
+
 async function execute({ currentTarget }) {
     const { env, pySrc, outDiv } = this;
     const hasRunButton = !!currentTarget;
 
     if (hasRunButton) {
-        currentTarget.disabled = true;
+        currentTarget.classList.add("running");
         outDiv.innerHTML = "";
     }
 
@@ -82,8 +88,7 @@ async function execute({ currentTarget }) {
         // creation and destruction of editors on the fly
         if (hasRunButton) {
             for (const type of TYPES.keys()) {
-                const editor = currentTarget.closest(`.${type}-editor-box`);
-                const script = editor?.parentNode?.previousElementSibling;
+                const script = getRelatedScript(currentTarget, type);
                 if (script) {
                     defineProperties(script, { xworker: { value: xworker } });
                     break;
@@ -116,7 +121,7 @@ async function execute({ currentTarget }) {
         };
 
         const enable = () => {
-            if (hasRunButton) currentTarget.disabled = false;
+            if (hasRunButton) currentTarget.classList.remove("running");
         };
         const { sync } = xworker;
         sync.write = (str) => {
@@ -144,6 +149,24 @@ const makeRunButton = (handler, type) => {
     runButton.innerHTML = RUN_BUTTON;
     runButton.setAttribute("aria-label", "Python Script Run Button");
     runButton.addEventListener("click", async (event) => {
+        if (
+            runButton.classList.contains("running") &&
+            confirm("Would you like to kill this execution?")
+        ) {
+            const script = getRelatedScript(runButton, type);
+            if (script) {
+                const editor = editors.get(script);
+                const content = editor.state.doc.toString();
+                const clone = script.cloneNode(true);
+                clone.type = `${type}-editor`;
+                clone.textContent = content;
+                script.xworker.terminate();
+                script.nextElementSibling.remove();
+                script.replaceWith(clone);
+                editors.delete(script);
+            }
+            return;
+        }
         runButton.blur();
         await handler.handleEvent(event);
     });
@@ -387,6 +410,7 @@ const init = async (script, type, interpreter) => {
         doc,
     });
 
+    editors.set(script, editor);
     editor.focus();
     notifyEditor();
 };

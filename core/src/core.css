@@ -37,9 +37,9 @@ mpy-config {
 .py-editor-box:hover .py-editor-run-button,
 .mpy-editor-box:hover .mpy-editor-run-button,
 .py-editor-run-button:focus,
-.py-editor-run-button:disabled,
+.py-editor-run-button.running,
 .mpy-editor-run-button:focus,
-.mpy-editor-run-button:disabled {
+.mpy-editor-run-button.running {
     opacity: 1;
 }
 
@@ -48,16 +48,16 @@ mpy-config {
         transform: rotate(360deg);
     }
 }
-.py-editor-run-button:disabled > *,
-.mpy-editor-run-button:disabled > * {
+.py-editor-run-button.running > *,
+.mpy-editor-run-button.running > * {
     display: none; /* hide all the child elements of the run button when it is disabled */
 }
-.py-editor-run-button:disabled,
-.mpy-editor-run-button:disabled {
+.py-editor-run-button.running,
+.mpy-editor-run-button.running {
     border-width: 0;
 }
-.py-editor-run-button:disabled::before,
-.mpy-editor-run-button:disabled::before {
+.py-editor-run-button.running::before,
+.mpy-editor-run-button.running::before {
     content: "";
     box-sizing: border-box;
     position: absolute;
