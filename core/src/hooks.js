@@ -1,6 +1,6 @@
 import { typedSet } from "type-checked-collections";
 import { dedent } from "polyscript/exports";
-import toJSONCallback from "to-json-callback";
+import toJSONCallback from "reflected-ffi/to-json-callback";
 
 import { stdlib, optional } from "./stdlib.js";
 
